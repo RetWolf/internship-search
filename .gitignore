@@ -81,3 +81,5 @@ typings/
 
 credentials.json
 token.json
+.vscode/*
+portfolio-work-215906-f38475389957.json
