@@ -23,7 +23,7 @@ app.get('/api/v1/internship-search', (req, res, next) => {
     ['https://www.googleapis.com/auth/spreadsheets.readonly']
   );
 
-  // Authorize our API client and log when we run an API call
+  // Authorize our API client and log when we run an API call - Get rid of logging in production
   JWTClient.authorize((err, token) => {
     if (err) console.error(err);
     else console.info('Running API Call');
