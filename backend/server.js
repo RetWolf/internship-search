@@ -1,3 +1,4 @@
+const url = require('url');
 const { google } = require('googleapis');
 const express = require('express');
 const serviceaccount = require('./portfolio-work-215906-f38475389957.json');
@@ -16,32 +17,36 @@ app.use((req, res, next) => {
 // @returns JSON Array with rows from Google Sheets - https://docs.google.com/spreadsheets/d/1_y96aif5T416xwyLW6LFt_VYBsMJH2d6bV-f_8cKgRI/edit#gid=0
 app.get('/api/v1/internship-search', (req, res, next) => {
   // Create an API Client using a Google Cloud Service Account credentials file
-  let JWTClient = new google.auth.JWT(
-    serviceaccount.client_email,
-    null,
-    serviceaccount.private_key,
-    ['https://www.googleapis.com/auth/spreadsheets.readonly']
-  );
-
-  // Authorize our API client and log when we run an API call - Get rid of logging in production
-  JWTClient.authorize((err, token) => {
-    if (err) console.error(err);
-    else console.info('Running API Call');
-  });
+  if(req.get('x-api-key') !== 'APIKEY') {
+    res.status(401).send('Unauthorized Request');
+  } else {
+    let JWTClient = new google.auth.JWT(
+      serviceaccount.client_email,
+      null,
+      serviceaccount.private_key,
+      ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    );
   
-  // Set up variables for our API call
-  const sheetId = '1_y96aif5T416xwyLW6LFt_VYBsMJH2d6bV-f_8cKgRI';
-  const sheetRange = 'A2:D';
-  const sheets = google.sheets('v4');
-  // Make an API call to the Google Sheets API V4
-  sheets.spreadsheets.values.get({
-    auth: JWTClient,
-    spreadsheetId: sheetId,
-    range: sheetRange
-  }, (err, apiRes) => {
-    if (err) console.error(`The API returned an error: ${err}`)
-    else res.json(apiRes.data.values); // Returns the JSON response
-  });
+    // Authorize our API client and log when we run an API call - Get rid of logging in production
+    JWTClient.authorize((err, token) => {
+      if (err) console.error(err);
+      else console.info('Running API Call');
+    });
+    
+    // Set up variables for our API call
+    const sheetId = '1_y96aif5T416xwyLW6LFt_VYBsMJH2d6bV-f_8cKgRI';
+    const sheetRange = 'A2:D';
+    const sheets = google.sheets('v4');
+    // Make an API call to the Google Sheets API V4
+    sheets.spreadsheets.values.get({
+      auth: JWTClient,
+      spreadsheetId: sheetId,
+      range: sheetRange
+    }, (err, apiRes) => {
+      if (err) console.error(`The API returned an error: ${err}`)
+      else res.json(apiRes.data.values); // Returns the JSON response
+    });
+  }
 });
 
 // Sets our server to listen on port 3001
